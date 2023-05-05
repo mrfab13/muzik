@@ -4,6 +4,8 @@ const passport = require("passport")
 const bodyParser = require("body-parser")
 const LocalStrategy = require("passport-local")
 const passportLocalMongoose = require("passport-local-mongoose")
+const flash = require('connect-flash');
+
 const app = express()
 const port = 3000
 
@@ -20,12 +22,14 @@ mongoose.connect('mongodb://127.0.0.1/data', {
 
 const userSchema = new mongoose.Schema({
   username: { type: String, required: true },
-  password: { type: String, required: true },
+  password: { type: String, required: true }
 });
 
 userSchema.plugin(passportLocalMongoose);
 
 const User = mongoose.model('User', userSchema);
+
+app.use(flash());
 
 app.use(bodyParser.json());
 
@@ -38,8 +42,10 @@ app.use(require("express-session")({
     resave: false,
     saveUninitialized: false
 }));
+
 app.use(passport.initialize());
 app.use(passport.session());
+
 passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
@@ -62,7 +68,7 @@ app.get('/register', (req, res) => {
 
 app.post('/register', async (req, res) => {
   try {
-    const user = new User({ username: req.body.username });
+    const user = new User({ username: req.body.username, password: req.body.password });
     await User.register(user, req.body.password);
     res.redirect('/');
   } catch (error) {

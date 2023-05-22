@@ -1,0 +1,15 @@
+body {
+    background-color: #1c1c1c;
+    color: white;
+}
+
+.the-box {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    border: 2px solid white;
+    padding: 20px;
+    box-sizing: border-box;
+}

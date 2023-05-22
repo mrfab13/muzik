@@ -7,11 +7,43 @@
 
 </head>
 <body>
-    <button type="button" class="btn btn-primary">penis</button>
-
     <h1>hi :3</h1>
     <h2>music server</h2>
+
+
     <img class="centreImage" src="https://cdn.discordapp.com/emojis/439086050741059585.gif?v=1" alt="work" style="float:none;width:100px;height:100px;">
+
+
+    <audio id="playingAudio" src="/audio/test.mp3" type="audio/mpeg" controls></audio>
+
+    <button onclick="playAudio()" type="button" class="btn btn-primary">Play Audio</button>
+    <button onclick="pauseAudio()" type="button" class="btn btn-primary">Pause Audio</button> 
+    
+    <script>
+    var x = document.getElementById("playingAudio"); 
+    
+    function playAudio() { 
+      x.play(); 
+    } 
+    
+    function pauseAudio() { 
+      x.pause(); 
+    } 
+
+    x.addEventListener("play", function() {
+  console.log("Audio is playing");
+});
+
+x.addEventListener("pause", function() {
+  console.log("Audio is paused");
+});
+
+x.addEventListener("ended", function() {
+  console.log("Audio has ended");
+});
+    </script>
+
+
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
 </body>

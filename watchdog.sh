@@ -8,6 +8,7 @@ while true; do
     git fetch --all
     git reset --hard origin/main
     git stash pop
+    git pull
     echo "[+] Done."
 
     #Start the muzik

@@ -2,8 +2,11 @@ const config = require("./config.json");
 
 const mariadb = require('mariadb');
 const express = require('express')
+const bodyParser = require('body-parser');
 
 const pool = mariadb.createPool(config.dbInfo);
+
+app.use(bodyParser.urlencoded({ extended: true }));
 
 var dbConnection;
 
@@ -50,6 +53,18 @@ app.get('/', (req, res) => {
 //   failureRedirect: '/', 
 //   failureFlash: true 
 // }));
+
+app.post('/register', (req, res) => {
+  const username = req.body.username;
+  const password = req.body.password;
+  
+  //TODO: Add hashing function here
+
+  AddNewUser(username, password);
+
+  // You can now use the username and password variables as needed
+  res.send(`Registered username: ${username}, password: ${password}`);
+});
 
 app.get('/register', (req, res) => {
    res.render('register.ejs');

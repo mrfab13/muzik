@@ -1,5 +1,5 @@
 #!/bin/bash
-pushd /srv/muzik
+pushd /srv/muzik/muzik
 while true; do
 
     #Apply any updates
@@ -12,9 +12,9 @@ while true; do
 
     #Start the muzik
     echo $'[+] Starting Service...\n'
-    (node ./muzik/app.js) &> muzik.log
-    date >> muzik.log
-    mv muzik.log muzik.old.log
+    (node ./muzik/app.js) &> muzik.latest.log
+    /usr/bin/date >> muzik.latest.log
+    mv muzik.latest.log muzik.log
 
     #Crashed record and restart
     TIME=$( date '+%F_%H:%M:%S' )

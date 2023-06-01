@@ -6,6 +6,9 @@ const bodyParser = require('body-parser');
 
 const pool = mariadb.createPool(config.dbInfo);
 
+const app = express()
+const port = 3000
+
 app.use(bodyParser.urlencoded({ extended: true }));
 
 var dbConnection;
@@ -33,9 +36,6 @@ async function AddNewUser(Username, Password){
 }
 
 InitaliseDBConnection();
-
-const app = express()
-const port = 3000
 
 //
 /// REMOVE THIS LATER, MAYBE WITH A POST + AUTH

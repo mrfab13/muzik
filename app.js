@@ -34,6 +34,13 @@ InitaliseDBConnection();
 const app = express()
 const port = 3000
 
+//
+/// REMOVE THIS LATER, MAYBE WITH A POST + AUTH
+//
+app.get('/reboot', (req, res) => {
+  process.exit(0)
+})
+
 app.get('/', (req, res) => {
    res.render('login.ejs');
 })

@@ -45,8 +45,10 @@ async function VerifyUser(Username, Password)
   const query = "SELECT PASSWORD FROM USERS WHERE USERNAME = '" + Username + "'";
   var hash = await dbConnection.query(query);
 
+  console.log("VERIFY START")
   console.log(hash)
-
+  console.log(hash.length)
+  console.log(hash[0].PASSWORD)
   if (hash.length == 0)
   {
     // No User By Name

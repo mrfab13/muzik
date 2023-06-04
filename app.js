@@ -1,5 +1,6 @@
 const config = require("./config.json");
 
+const base64 = require('base-64');
 const mariadb = require('mariadb');
 const express = require('express')
 const bodyParser = require('body-parser');
@@ -19,8 +20,6 @@ async function InitaliseDBConnection() {
   try 
   {
     dbConnection = await pool.getConnection();
-    const res1 = await dbConnection.query("USE USERDATA");
-    AddNewUser("Henry", "Password");
     const res = await dbConnection.query("SELECT * FROM USERS");
 	  console.log(res);
   } 
@@ -33,7 +32,8 @@ async function InitaliseDBConnection() {
 
 async function AddNewUser(Username, Password){
 
-  const hash = await argon2.hash(Password);
+  var hash = await argon2.hash(Password);
+  hash = base64.encode(hash);
 
   const response = await dbConnection.query("INSERT INTO USERS (USERNAME, PASSWORD) VALUES ('" + Username + "', '" + hash + "')");
 	console.log(response);
@@ -41,14 +41,16 @@ async function AddNewUser(Username, Password){
 
 async function VerifyUser(Username, Password)
 {
-  const query = "SELECT PASSWORD FROM USERS WHERE USERNAME = '" + username + "'";
-  const response = await dbConnection.query(query);
+  const query = "SELECT PASSWORD FROM USERS WHERE USERNAME = '" + Username + "'";
+  var hash = await dbConnection.query(query);
 
-  if (response.rows.length == 0)
+  if (hash.rows.length == 0)
   {
     // No User By Name
     return false;
   }
+
+  hash = base64.decode(hash.rows[0]);
 
   if (await argon2.verify(hash, Password)) 
   {

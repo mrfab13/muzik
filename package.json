@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "argon2": "^0.30.3",
+    "base-64": "^1.0.0",
     "body-parser": "^1.20.2",
     "bootstrap": "^5.2.3",
     "connect-flash": "^0.1.1",

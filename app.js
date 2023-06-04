@@ -3,6 +3,7 @@ const config = require("./config.json");
 const mariadb = require('mariadb');
 const express = require('express')
 const bodyParser = require('body-parser');
+const argon2 = require('argon2');
 
 const pool = mariadb.createPool(config.dbInfo);
 
@@ -31,8 +32,35 @@ async function InitaliseDBConnection() {
 }
 
 async function AddNewUser(Username, Password){
-  const res = await dbConnection.query("INSERT INTO USERS (USERNAME, PASSWORD) VALUES ('" + Username + "', '" + Password + "')");
-	console.log(res);
+
+  const hash = await argon2.hash(Password);
+
+  const response = await dbConnection.query("INSERT INTO USERS (USERNAME, PASSWORD) VALUES ('" + Username + "', '" + hash + "')");
+	console.log(response);
+}
+
+async function VerifyUser(Username, Password)
+{
+  const query = "SELECT PASSWORD FROM USERS WHERE USERNAME = '" + username + "'";
+  const response = await dbConnection.query(query);
+
+  if (response.rows.length == 0)
+  {
+    // No User By Name
+    return false;
+  }
+
+  if (await argon2.verify(hash, Password)) 
+  {
+    //Correct Password
+    return true;
+  }
+  else
+  {
+    //Wrong Password
+    return false;
+  }
+
 }
 
 InitaliseDBConnection();
@@ -54,11 +82,29 @@ app.get('/', (req, res) => {
 //   failureFlash: true 
 // }));
 
+app.post('/login', async (req, res) => {
+  const username = req.body.username;
+  const password = req.body.password
+
+  const result = await VerifyUser(username, password);
+  if (result === true)
+  {
+    // You can now use the username and password variables as needed
+    res.send(`Found username: ${username}, password: ${password}`);
+  }
+  else
+  {
+    res.send('error')
+  }
+});
+
+app.get('/login', (req, res) => {
+   res.render('login.ejs');
+});
+
 app.post('/register', (req, res) => {
   const username = req.body.username;
-  const password = req.body.password;
-  
-  //TODO: Add hashing function here
+  const password = req.body.password
 
   AddNewUser(username, password);
 

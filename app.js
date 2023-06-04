@@ -20,6 +20,7 @@ async function InitaliseDBConnection() {
   try 
   {
     dbConnection = await pool.getConnection();
+    const db = await dbConnection.query("USE USERDATA");
     const res = await dbConnection.query("SELECT * FROM USERS");
 	  console.log(res);
   } 

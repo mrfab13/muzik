@@ -45,13 +45,15 @@ async function VerifyUser(Username, Password)
   const query = "SELECT PASSWORD FROM USERS WHERE USERNAME = '" + Username + "'";
   var hash = await dbConnection.query(query);
 
-  if (hash.rows.length == 0)
+  console.log(hash)
+
+  if (hash.length == 0)
   {
     // No User By Name
     return false;
   }
 
-  hash = base64.decode(hash.rows[0]);
+  hash = base64.decode(hash);
 
   if (await argon2.verify(hash, Password)) 
   {

@@ -1,12 +1,12 @@
-const config = require("./config.json");
+//const config = require("./config.json");
 
 const base64 = require('base-64');
-const mariadb = require('mariadb');
+//const mariadb = require('mariadb');
 const express = require('express')
 const bodyParser = require('body-parser');
 const argon2 = require('argon2');
 
-const pool = mariadb.createPool(config.dbInfo);
+//const pool = mariadb.createPool(config.dbInfo);
 
 const app = express()
 const port = 8080
@@ -17,14 +17,14 @@ var dbConnection;
 
 // Connect to db
 async function InitaliseDBConnection() {
-  try 
+  try
   {
     dbConnection = await pool.getConnection();
     const db = await dbConnection.query("USE USERDATA");
     const res = await dbConnection.query("SELECT * FROM USERS");
 	  console.log(res);
-  } 
-  catch (err) 
+  }
+  catch (err)
   {
     console.log(err);
   }
@@ -68,7 +68,7 @@ async function VerifyUser(Username, Password)
 
 }
 
-InitaliseDBConnection();
+//InitaliseDBConnection();
 
 //
 /// REMOVE THIS LATER, MAYBE WITH A POST + AUTH
@@ -78,33 +78,41 @@ app.get('/reboot', (req, res) => {
 })
 
 app.get('/', (req, res) => {
-   res.render('login.ejs');
+   res.render('landing.ejs', {username: ""});
 })
 
-// app.post('/', passport.authenticate('local', { 
-//   successRedirect: '/muzik', 
-//   failureRedirect: '/', 
-//   failureFlash: true 
-// }));
-
 app.post('/', async (req, res) => {
+  console.log(req.body);
   const username = req.body.username;
-  const password = req.body.password
+  const password = req.body.password;
 
-  const result = await VerifyUser(username, password);
+  // Stage 1 Landing Submission
+  if (password == "")
+  {
+      // TODO: Send render back with vars to say to render password field
+      res.render("landing.ejs", {username : username});
+      return;
+  }
+
+  const result = true;
+  //const result = await VerifyUser(username, password);
   if (result === true)
   {
     // You can now use the username and password variables as needed
-    res.send(`Found username: ${username}, password: ${password}`);
+    // res.send(`Found username: ${username}, password: ${password}`);
+
+    // Redirect to media page
+    res.render("music.ejs")
   }
   else
   {
-    res.send('error')
+    // If the user was wrong send them back to the start
+    res.render("landing.ejs", {username: ""})
   }
 });
 
 app.get('/login', (req, res) => {
-   res.render('login.ejs');
+   res.render('landing.ejs', {username: ""});
 });
 
 app.post('/register', (req, res) => {

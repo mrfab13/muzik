@@ -1,17 +1,28 @@
-//const config = require("./config.json");
+// JWTS NEED TO BE CHECKED TO BE VALID, NOT IN DB AS THAT IS THE POINT OF A JWT THEY HAVE A LIFETIME AND SIGNTURE
+// LOGOUT/CLEAR A JWT
+// NEEDS TO HAVE AN ADMIN MODE FOR USERS SO I CAN REGISTER NEW USERS
+// FOR THE LOVE OF GOD SQL INJECTION VUNS EVERYWHERE ><
+// NEEDS TO BE ABLE TO SEARCH THROUGH DB FOR MEDIA
+// CAN DOWNLOAD MEDIA
+// CAN PLAY MEDIA
 
+const config = require("./config.json");
+const security = require('./security.js');
+
+const cookieParser = require('cookie-parser')
 const base64 = require('base-64');
-//const mariadb = require('mariadb');
+const mariadb = require('mariadb');
 const express = require('express')
 const bodyParser = require('body-parser');
 const argon2 = require('argon2');
 
-//const pool = mariadb.createPool(config.dbInfo);
+const pool = mariadb.createPool(config.dbInfo);
 
 const app = express()
 const port = 8080
 
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 var dbConnection;
 
@@ -31,8 +42,10 @@ async function InitaliseDBConnection() {
   return;
 }
 
-async function AddNewUser(Username, Password){
-
+async function AddNewUser(Username, Password)
+{
+  // TODO: SANATISE INPUTS FOR SQL INJECTIONS
+  
   var hash = await argon2.hash(Password);
   hash = base64.encode(hash);
 
@@ -42,6 +55,8 @@ async function AddNewUser(Username, Password){
 
 async function VerifyUser(Username, Password)
 {
+  // TODO: SANATISE INPUTS FOR SQL INJECTIONS
+
   const query = "SELECT PASSWORD FROM USERS WHERE USERNAME = '" + Username + "'";
   var hash = await dbConnection.query(query);
 
@@ -65,10 +80,9 @@ async function VerifyUser(Username, Password)
     //Wrong Password
     return false;
   }
-
 }
 
-//InitaliseDBConnection();
+InitaliseDBConnection();
 
 //
 /// REMOVE THIS LATER, MAYBE WITH A POST + AUTH
@@ -78,7 +92,14 @@ app.get('/reboot', (req, res) => {
 })
 
 app.get('/', (req, res) => {
-   res.render('landing.ejs', {username: ""});
+  if (req.cookies["muzikAuth"] != undefined)
+  {
+    res.render("music.ejs");
+  }
+  else
+  {
+    res.render('landing.ejs', {username: ""});
+  }
 })
 
 app.post('/', async (req, res) => {
@@ -89,20 +110,25 @@ app.post('/', async (req, res) => {
   // Stage 1 Landing Submission
   if (password == "")
   {
-      // TODO: Send render back with vars to say to render password field
       res.render("landing.ejs", {username : username});
       return;
   }
 
-  const result = true;
-  //const result = await VerifyUser(username, password);
+  const result = await VerifyUser(username, password);
   if (result === true)
   {
-    // You can now use the username and password variables as needed
-    // res.send(`Found username: ${username}, password: ${password}`);
+    // TODO: ADD USERID AND ISADMIN FLAGS HERE ><
+    // Assign JWT
+    var JWTCookie = security.GenerateJWT(username, 0, false);
+    res.cookie("muzikAuth", JWTCookie.JWTData, {
+      //Should also use secure flag when ssl
+      httpOnly: true, 
+      sameSite: "Lax",
+      maxAge : JWTCookie.expiryDate
+    });
 
     // Redirect to media page
-    res.render("music.ejs")
+    res.render("music.ejs");
   }
   else
   {
@@ -112,7 +138,7 @@ app.post('/', async (req, res) => {
 });
 
 app.get('/login', (req, res) => {
-   res.render('landing.ejs', {username: ""});
+  res.render('landing.ejs', {username: ""});
 });
 
 app.post('/register', (req, res) => {
